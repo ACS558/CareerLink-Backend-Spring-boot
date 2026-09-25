@@ -154,6 +154,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>careerlink-backend-spring-boot</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
