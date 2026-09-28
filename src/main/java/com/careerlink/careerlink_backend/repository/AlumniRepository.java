@@ -22,14 +22,13 @@ public interface AlumniRepository extends JpaRepository<Alumni, Long> {
     WHERE (:status IS NULL OR CAST(a.verificationStatus AS string) = :status)
     AND (:branch IS NULL OR a.academicInfo.branch = :branch)
     AND (:graduationYear IS NULL OR a.academicInfo.graduationYear = :graduationYear)
-    AND (CAST(:search AS string) IS NULL OR
-         LOWER(a.registrationNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR
-         LOWER(a.personalInfo.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR
-         LOWER(a.personalInfo.lastName) LIKE LOWER(CONCAT('%', :search, '%')))
+    AND (LOWER(COALESCE(a.registrationNumber, '')) LIKE :pattern ESCAPE '\\'
+      OR LOWER(COALESCE(a.personalInfo.firstName, '')) LIKE :pattern ESCAPE '\\'
+      OR LOWER(COALESCE(a.personalInfo.lastName, '')) LIKE :pattern ESCAPE '\\')
     ORDER BY a.createdAt DESC
     """)
     List<Alumni> searchAlumni(
-            @Param("search") String search,
+            @Param("pattern") String pattern,
             @Param("status") String status,
             @Param("branch") String branch,
             @Param("graduationYear") Integer graduationYear);

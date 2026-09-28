@@ -44,19 +44,17 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     WHERE (:branch IS NULL OR s.academicInfo.branch = :branch)
     AND (:placementStatus IS NULL OR CAST(s.placementStatus AS string) = :placementStatus)
     AND (:graduationYear IS NULL OR s.academicInfo.graduationYear = :graduationYear)
-    AND (CAST(:search AS string) IS NULL OR
-         LOWER(s.registrationNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR
-         LOWER(s.personalInfo.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR
-         LOWER(s.personalInfo.lastName) LIKE LOWER(CONCAT('%', :search, '%')))
+    AND (LOWER(COALESCE(s.registrationNumber, '')) LIKE :pattern ESCAPE '\\'
+      OR LOWER(COALESCE(s.personalInfo.firstName, '')) LIKE :pattern ESCAPE '\\'
+      OR LOWER(COALESCE(s.personalInfo.lastName, '')) LIKE :pattern ESCAPE '\\')
     ORDER BY s.academicInfo.cgpa DESC
     """)
     Page<Student> searchStudents(
-            @Param("search") String search,
+            @Param("pattern") String pattern,
             @Param("branch") String branch,
             @Param("placementStatus") String placementStatus,
             @Param("graduationYear") Integer graduationYear,
             Pageable pageable);
-
 
     @Query("SELECT MIN(s.placedPackage) FROM Student s WHERE s.placementStatus = 'PLACED'")
     Double lowestPlacedPackage();

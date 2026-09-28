@@ -84,32 +84,40 @@ public class AdminService {
     }
 
     // ---------- List-all endpoints ----------
+    private static String toPattern(String search) {
+        if (search == null || search.isBlank()) return "%";
+        String escaped = search.trim()
+                .replace("\\", "\\\\")   // escape the escape char first
+                .replace("%", "\\%")
+                .replace("_", "\\_");
+        return "%" + escaped.toLowerCase() + "%";
+    }
 
     public List<RecruiterResponse> listAllRecruiters(String search, String status) {
-        String s = (search != null && !search.isBlank()) ? search : null;
         String st = (status != null && !status.isBlank()) ? status.toUpperCase() : null;
-        return recruiterRepository.searchRecruiters(s, st).stream().map(recruiterService::toResponse).toList();
+        return recruiterRepository.searchRecruiters(toPattern(search), st)
+                .stream().map(recruiterService::toResponse).toList();
     }
 
     public List<AlumniResponse> listAllAlumni(String search, String status, String branch, Integer graduationYear) {
-        String s = (search != null && !search.isBlank()) ? search : null;
         String st = (status != null && !status.isBlank()) ? status.toUpperCase() : null;
-        String b = (branch != null && !branch.isBlank()) ? branch : null;
-        return alumniRepository.searchAlumni(s, st, b, graduationYear).stream().map(alumniService::toResponse).toList();
+        String b  = (branch != null && !branch.isBlank()) ? branch : null;
+        return alumniRepository.searchAlumni(toPattern(search), st, b, graduationYear)
+                .stream().map(alumniService::toResponse).toList();
     }
 
     public Page<StudentResponse> listAllStudents(String search, String branch, String placementStatus,
                                                  Integer graduationYear, Pageable pageable) {
-        String s = (search != null && !search.isBlank()) ? search : null;
-        String b = (branch != null && !branch.isBlank()) ? branch : null;
+        String b  = (branch != null && !branch.isBlank()) ? branch : null;
         String ps = (placementStatus != null && !placementStatus.isBlank()) ? placementStatus.toUpperCase() : null;
-        return studentRepository.searchStudents(s, b, ps, graduationYear, pageable).map(studentMapper::toResponse);
+        return studentRepository.searchStudents(toPattern(search), b, ps, graduationYear, pageable)
+                .map(studentMapper::toResponse);
     }
 
     public List<JobResponse> listAllJobs(String search, String status) {
-        String s = (search != null && !search.isBlank()) ? search : null;
         String st = (status != null && !status.isBlank()) ? status.toUpperCase() : null;
-        return jobRepository.searchJobsForAdmin(s, st).stream().map(jobMapper::toResponse).toList();
+        return jobRepository.searchJobsForAdmin(toPattern(search), st)
+                .stream().map(jobMapper::toResponse).toList();
     }
 
     public List<ReferralResponse> listAllReferrals() {
