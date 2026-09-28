@@ -25,10 +25,13 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     LEFT JOIN j.graduationYears gy
     WHERE j.approvalStatus = 'APPROVED'
     AND j.isActive = true
-    AND (j.eligibleBranches IS EMPTY OR :branch IS NULL OR b = :branch)
+    AND :branch IS NOT NULL
+    AND :cgpa > 0.0
+    AND :graduationYear IS NOT NULL
+    AND (j.eligibleBranches IS EMPTY OR b = :branch)
     AND (j.minCgpa IS NULL OR :cgpa >= j.minCgpa)
     AND (:backlogs <= j.maxBacklogs)
-    AND (j.graduationYears IS EMPTY OR :graduationYear IS NULL OR gy = :graduationYear)
+    AND (j.graduationYears IS EMPTY OR gy = :graduationYear)
     ORDER BY j.createdAt DESC
     """)
     Page<Job> findEligibleJobsForStudent(
@@ -37,6 +40,7 @@ public interface JobRepository extends JpaRepository<Job, Long> {
             @Param("backlogs") Integer backlogs,
             @Param("graduationYear") Integer graduationYear,
             Pageable pageable);
+
 
 
     long countByApprovalStatus(ApprovalStatus status);

@@ -82,10 +82,28 @@ public class JobService {
     }
 
     public Page<JobResponse> getEligibleJobsForStudent(Student student, Pageable pageable) {
-        String branch = student.getAcademicInfo() != null ? student.getAcademicInfo().getBranch() : null;
-        Double cgpa = student.getAcademicInfo() != null ? student.getAcademicInfo().getCgpa() : 0.0;
-        Integer backlogs = student.getAcademicInfo() != null ? student.getAcademicInfo().getBacklogs() : 0;
-        Integer gradYear = student.getAcademicInfo() != null ? student.getAcademicInfo().getGraduationYear() : null;
+        // Reference academic info once to keep the ternary expressions readable
+        var academicInfo = student.getAcademicInfo();
+
+        // 1. Handle Branch safely
+        String branch = (academicInfo != null && academicInfo.getBranch() != null)
+                ? academicInfo.getBranch()
+                : null;
+
+        // 2. Handle CGPA safely (Fixes the Double unboxing crash)
+        Double cgpa = (academicInfo != null && academicInfo.getCgpa() != null)
+                ? academicInfo.getCgpa()
+                : 0.0;
+
+        // 3. Handle Backlogs safely
+        Integer backlogs = (academicInfo != null && academicInfo.getBacklogs() != null)
+                ? academicInfo.getBacklogs()
+                : 0;
+
+        // 4. Handle Graduation Year safely
+        Integer gradYear = (academicInfo != null && academicInfo.getGraduationYear() != null)
+                ? academicInfo.getGraduationYear()
+                : null;
 
         return jobRepository.findEligibleJobsForStudent(branch, cgpa, backlogs, gradYear, pageable)
                 .map(jobMapper::toResponse);
