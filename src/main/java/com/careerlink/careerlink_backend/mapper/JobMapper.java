@@ -8,25 +8,51 @@ import org.springframework.stereotype.Component;
 public class JobMapper {
 
     public JobResponse toResponse(Job job) {
+        // 1. Safeguard against null recruiter
+        var recruiter = job.getRecruiter();
+
+        Long recruiterId = (recruiter != null) ? recruiter.getId() : null;
+
+        String email = (recruiter != null && recruiter.getUser() != null)
+                ? recruiter.getUser().getEmail() : null;
+
+        String companyName = (recruiter != null && recruiter.getCompanyInfo() != null)
+                ? recruiter.getCompanyInfo().getCompanyName() : null;
+
+        String logoUrl = (recruiter != null && recruiter.getCompanyInfo() != null)
+                ? recruiter.getCompanyInfo().getCompanyLogoUrl() : null;
+
+        String industry = (recruiter != null && recruiter.getCompanyInfo() != null)
+                ? recruiter.getCompanyInfo().getIndustry() : null;
+
+        String companySize = (recruiter != null && recruiter.getCompanyInfo() != null)
+                ? recruiter.getCompanyInfo().getCompanySize() : null;
+
+        String website = (recruiter != null && recruiter.getCompanyInfo() != null)
+                ? recruiter.getCompanyInfo().getWebsite() : null;
+
+        String description = (recruiter != null && recruiter.getCompanyInfo() != null)
+                ? recruiter.getCompanyInfo().getDescription() : null;
+
+        // 2. Return the new response with the safe variables
         return new JobResponse(
                 job.getId(),
-                job.getRecruiter().getId(),
-                job.getRecruiter().getUser() != null ? job.getRecruiter().getUser().getEmail() : null,
-                job.getRecruiter().getCompanyInfo() != null ? job.getRecruiter().getCompanyInfo().getCompanyName() : null,
-                job.getRecruiter().getCompanyInfo() != null ? job.getRecruiter().getCompanyInfo().getCompanyLogoUrl() : null,
-                // JobMapper.java — add matching values:
-                job.getRecruiter().getCompanyInfo() != null ? job.getRecruiter().getCompanyInfo().getIndustry() : null,
-                job.getRecruiter().getCompanyInfo() != null ? job.getRecruiter().getCompanyInfo().getCompanySize() : null,
-                job.getRecruiter().getCompanyInfo() != null ? job.getRecruiter().getCompanyInfo().getWebsite() : null,
-                job.getRecruiter().getCompanyInfo() != null ? job.getRecruiter().getCompanyInfo().getDescription() : null,
+                recruiterId,
+                email,
+                companyName,
+                logoUrl,
+                industry,
+                companySize,
+                website,
+                description,
                 job.getTitle(),
                 job.getDescription(),
-                job.getJobType().name(),
-                job.getWorkMode().name(),
+                job.getJobType() != null ? job.getJobType().name() : null,
+                job.getWorkMode() != null ? job.getWorkMode().name() : null,
                 job.getLocation(),
                 job.getSalaryMin(),
                 job.getSalaryMax(),
-                job.getSalaryType().name(),
+                job.getSalaryType() != null ? job.getSalaryType().name() : null,
                 job.getEligibleBranches(),
                 job.getMinCgpa(),
                 job.getMaxBacklogs(),
@@ -35,7 +61,7 @@ public class JobMapper {
                 job.getNumberOfOpenings(),
                 job.getApplicationDeadline(),
                 job.isActive(),
-                job.getApprovalStatus().name(),
+                job.getApprovalStatus() != null ? job.getApprovalStatus().name() : null,
                 job.getCreatedAt()
         );
     }
