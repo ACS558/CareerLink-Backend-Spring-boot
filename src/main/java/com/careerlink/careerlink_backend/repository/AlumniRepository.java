@@ -19,18 +19,18 @@ public interface AlumniRepository extends JpaRepository<Alumni, Long> {
 
     @Query("""
         SELECT a FROM Alumni a
-        WHERE (:status IS NULL OR a.verificationStatus = :status)
-        AND (:branch IS NULL OR a.academicInfo.branch = :branch)
-        AND (:graduationYear IS NULL OR a.academicInfo.graduationYear = :graduationYear)
+        WHERE CAST(a.verificationStatus AS string) = COALESCE(CAST(:status AS string), CAST(a.verificationStatus AS string))
+        AND a.academicInfo.branch = COALESCE(CAST(:branch AS string), a.academicInfo.branch)
+        AND a.academicInfo.graduationYear = COALESCE(CAST(:graduationYear AS integer), a.academicInfo.graduationYear)
         AND (:search IS NULL OR
-             LOWER(a.registrationNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR
-             LOWER(a.personalInfo.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR
-             LOWER(a.personalInfo.lastName) LIKE LOWER(CONCAT('%', :search, '%')))
+             LOWER(a.registrationNumber) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) OR
+             LOWER(a.personalInfo.firstName) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) OR
+             LOWER(a.personalInfo.lastName) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))
         ORDER BY a.createdAt DESC
         """)
     List<Alumni> searchAlumni(
             @Param("search") String search,
-            @Param("status") VerificationStatus status,
+            @Param("status") String status,
             @Param("branch") String branch,
             @Param("graduationYear") Integer graduationYear);
 }

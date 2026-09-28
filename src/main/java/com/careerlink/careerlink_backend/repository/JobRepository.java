@@ -25,10 +25,10 @@ public interface JobRepository extends JpaRepository<Job, Long> {
         LEFT JOIN j.graduationYears gy
         WHERE j.approvalStatus = 'APPROVED'
         AND j.isActive = true
-        AND (j.eligibleBranches IS EMPTY OR b = :branch)
+        AND (j.eligibleBranches IS EMPTY OR b = COALESCE(CAST(:branch AS string), b))
         AND (j.minCgpa IS NULL OR :cgpa >= j.minCgpa)
         AND (:backlogs <= j.maxBacklogs)
-        AND (j.graduationYears IS EMPTY OR gy = :graduationYear)
+        AND (j.graduationYears IS EMPTY OR gy = COALESCE(CAST(:graduationYear AS integer), gy))
         ORDER BY j.createdAt DESC
         """)
     Page<Job> findEligibleJobsForStudent(
@@ -45,9 +45,9 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
     @Query("""
         SELECT j FROM Job j
-        WHERE (:status IS NULL OR j.approvalStatus = :status)
-        AND (:search IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :search, '%')))
+        WHERE CAST(j.approvalStatus AS string) = COALESCE(CAST(:status AS string), CAST(j.approvalStatus AS string))
+        AND (:search IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))
         ORDER BY j.createdAt DESC
         """)
-    List<Job> searchJobsForAdmin(@Param("search") String search, @Param("status") ApprovalStatus status);
+    List<Job> searchJobsForAdmin(@Param("search") String search, @Param("status") String status);
 }

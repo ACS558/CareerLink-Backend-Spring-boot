@@ -50,13 +50,13 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
 
     @Query("""
         SELECT a FROM Application a
-        WHERE (:status IS NULL OR a.status = :status)
-        AND (:jobId IS NULL OR a.job.id = :jobId)
-        AND (:studentId IS NULL OR a.student.id = :studentId)
+        WHERE CAST(a.status AS string) = COALESCE(CAST(:status AS string), CAST(a.status AS string))
+        AND a.job.id = COALESCE(CAST(:jobId AS long), a.job.id)
+        AND a.student.id = COALESCE(CAST(:studentId AS long), a.student.id)
         ORDER BY a.createdAt DESC
         """)
     List<Application> findAllFiltered(
-            @Param("status") ApplicationStatus status,
+            @Param("status") String status,
             @Param("jobId") Long jobId,
             @Param("studentId") Long studentId);
 }

@@ -17,9 +17,9 @@ public interface RecruiterRepository extends JpaRepository<Recruiter, Long> {
 
     @Query("""
         SELECT r FROM Recruiter r
-        WHERE (:status IS NULL OR r.verificationStatus = :status)
-        AND (:search IS NULL OR LOWER(r.companyInfo.companyName) LIKE LOWER(CONCAT('%', :search, '%')))
+        WHERE CAST(r.verificationStatus AS string) = COALESCE(CAST(:status AS string), CAST(r.verificationStatus AS string))
+        AND (:search IS NULL OR LOWER(r.companyInfo.companyName) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))
         ORDER BY r.createdAt DESC
         """)
-    List<Recruiter> searchRecruiters(@Param("search") String search, @Param("status") VerificationStatus status);
+    List<Recruiter> searchRecruiters(@Param("search") String search, @Param("status") String status);
 }
