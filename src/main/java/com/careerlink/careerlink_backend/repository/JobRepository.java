@@ -20,17 +20,17 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
     // Jobs visible to a given student: approved, active, and matching their branch/CGPA/backlog/grad year
     @Query("""
-        SELECT DISTINCT j FROM Job j
-        LEFT JOIN j.eligibleBranches b
-        LEFT JOIN j.graduationYears gy
-        WHERE j.approvalStatus = 'APPROVED'
-        AND j.isActive = true
-        AND (j.eligibleBranches IS EMPTY OR b = COALESCE(CAST(:branch AS string), b))
-        AND (j.minCgpa IS NULL OR :cgpa >= j.minCgpa)
-        AND (:backlogs <= j.maxBacklogs)
-        AND (j.graduationYears IS EMPTY OR gy = COALESCE(CAST(:graduationYear AS integer), gy))
-        ORDER BY j.createdAt DESC
-        """)
+    SELECT DISTINCT j FROM Job j
+    LEFT JOIN j.eligibleBranches b
+    LEFT JOIN j.graduationYears gy
+    WHERE j.approvalStatus = 'APPROVED'
+    AND j.isActive = true
+    AND (j.eligibleBranches IS EMPTY OR b = COALESCE(CAST(:branch AS string), b))
+    AND (j.minCgpa IS NULL OR :cgpa >= j.minCgpa)
+    AND (:backlogs <= j.maxBacklogs)
+    AND (j.graduationYears IS EMPTY OR gy = COALESCE(CAST(:graduationYear AS integer), gy))
+    ORDER BY j.createdAt DESC
+    """)
     Page<Job> findEligibleJobsForStudent(
             @Param("branch") String branch,
             @Param("cgpa") Double cgpa,
@@ -38,16 +38,18 @@ public interface JobRepository extends JpaRepository<Job, Long> {
             @Param("graduationYear") Integer graduationYear,
             Pageable pageable);
 
+
     long countByApprovalStatus(ApprovalStatus status);
 
     @Query("SELECT j.recruiter.companyInfo.companyName, COUNT(a) FROM Job j JOIN Application a ON a.job = j WHERE a.status = 'SELECTED' GROUP BY j.recruiter.companyInfo.companyName")
     List<Object[]> countSelectionsByCompany();
 
     @Query("""
-        SELECT j FROM Job j
-        WHERE CAST(j.approvalStatus AS string) = COALESCE(CAST(:status AS string), CAST(j.approvalStatus AS string))
-        AND (:search IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))
-        ORDER BY j.createdAt DESC
-        """)
+    SELECT j FROM Job j
+    WHERE (:status IS NULL OR CAST(j.approvalStatus AS string) = :status)
+    AND (CAST(:search AS string) IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :search, '%')))
+    ORDER BY j.createdAt DESC
+    """)
     List<Job> searchJobsForAdmin(@Param("search") String search, @Param("status") String status);
+
 }

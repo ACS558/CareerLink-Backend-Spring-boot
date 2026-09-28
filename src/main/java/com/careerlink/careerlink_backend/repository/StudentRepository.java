@@ -40,22 +40,23 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     Double highestPlacedPackage();
 
     @Query("""
-        SELECT s FROM Student s
-        WHERE s.academicInfo.branch = COALESCE(CAST(:branch AS string), s.academicInfo.branch)
-        AND CAST(s.placementStatus AS string) = COALESCE(CAST(:placementStatus AS string), CAST(s.placementStatus AS string))
-        AND s.academicInfo.graduationYear = COALESCE(CAST(:graduationYear AS integer), s.academicInfo.graduationYear)
-        AND (:search IS NULL OR
-             LOWER(s.registrationNumber) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) OR
-             LOWER(s.personalInfo.firstName) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) OR
-             LOWER(s.personalInfo.lastName) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))
-        ORDER BY s.academicInfo.cgpa DESC
-        """)
+    SELECT s FROM Student s
+    WHERE (:branch IS NULL OR s.academicInfo.branch = :branch)
+    AND (:placementStatus IS NULL OR CAST(s.placementStatus AS string) = :placementStatus)
+    AND (:graduationYear IS NULL OR s.academicInfo.graduationYear = :graduationYear)
+    AND (CAST(:search AS string) IS NULL OR
+         LOWER(s.registrationNumber) LIKE LOWER(CONCAT('%', :search, '%')) OR
+         LOWER(s.personalInfo.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR
+         LOWER(s.personalInfo.lastName) LIKE LOWER(CONCAT('%', :search, '%')))
+    ORDER BY s.academicInfo.cgpa DESC
+    """)
     Page<Student> searchStudents(
             @Param("search") String search,
             @Param("branch") String branch,
-            @Param("placementStatus") String placementStatus, // now String, not PlacementStatus enum
+            @Param("placementStatus") String placementStatus,
             @Param("graduationYear") Integer graduationYear,
             Pageable pageable);
+
 
     @Query("SELECT MIN(s.placedPackage) FROM Student s WHERE s.placementStatus = 'PLACED'")
     Double lowestPlacedPackage();
