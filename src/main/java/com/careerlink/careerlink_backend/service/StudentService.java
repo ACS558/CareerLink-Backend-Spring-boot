@@ -67,7 +67,7 @@ public class StudentService {
         if (student.getResume() == null || student.getResume().getPublicId() == null) {
             throw new ResourceNotFoundException("No resume to delete");
         }
-        cloudinaryService.deleteFile(student.getResume().getPublicId(), "raw");
+        cloudinaryService.deleteFile(student.getResume().getPublicId(), "image");
         student.setResume(null);
         student.setResumeText(null);
         student.setProfileCompleted(isProfileComplete(student));
@@ -147,7 +147,7 @@ public class StudentService {
         String oldPublicId = student.getResume() != null ? student.getResume().getPublicId() : null;
 
         // 1. Upload new resume first
-        CloudinaryFile uploaded = cloudinaryService.uploadFile(file, "careerlink/resumes", "raw");
+        CloudinaryFile uploaded = cloudinaryService.uploadFile(file, "careerlink/resumes", "image");
 
         // 2. Extract text — if this fails, we still keep the newly uploaded file reference
         //    (better than losing both old and new), and surface the error to the caller.
