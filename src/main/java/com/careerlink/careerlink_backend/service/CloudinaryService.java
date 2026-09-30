@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,10 +22,21 @@ public class CloudinaryService {
     // resourceType: "image" for photos/logos, "raw" for PDFs
     public CloudinaryFile uploadFile(MultipartFile file, String folder, String resourceType) {
         try {
-            Map<?, ?> result = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+
+            Map<String, Object> options = new HashMap<>(ObjectUtils.asMap(
                     "folder", folder,
                     "resource_type", resourceType
             ));
+
+            if ("raw".equals(resourceType)) {
+                String original = file.getOriginalFilename();
+                String ext = (original != null && original.contains("."))
+                        ? original.substring(original.lastIndexOf('.'))
+                        : "";
+                options.put("public_id", UUID.randomUUID() + ext);
+            }
+
+            Map<?, ?> result = cloudinary.uploader().upload(file.getBytes(), options);
 
             CloudinaryFile cf = new CloudinaryFile();
             cf.setUrl((String) result.get("secure_url"));
