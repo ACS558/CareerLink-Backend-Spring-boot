@@ -36,6 +36,7 @@ public class DataInitializer implements CommandLineRunner {
         PersonalInfo personalInfo = new PersonalInfo();
         personalInfo.setFirstName("Super");
         personalInfo.setLastName("Admin");
+        personalInfo.setEmail("superadmin@careerlink.com");
 
         Admin admin = new Admin();
         admin.setUser(user);

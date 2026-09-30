@@ -433,6 +433,7 @@ public class AdminService {
 
         PersonalInfo personalInfo = new PersonalInfo();
         personalInfo.setFirstName(req.name());
+        personalInfo.setEmail(req.email());
 
         Admin admin = new Admin();
         admin.setUser(user);

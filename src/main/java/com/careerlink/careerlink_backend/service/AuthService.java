@@ -59,7 +59,9 @@ public class AuthService {
         Student student = new Student();
         student.setUser(user);
         student.setRegistrationNumber(req.registrationNumber().toUpperCase());
-        student.setPersonalInfo(new PersonalInfo());
+        PersonalInfo personalInfo = new PersonalInfo();
+        personalInfo.setEmail(req.email());
+        student.setPersonalInfo(personalInfo);
         student.setAcademicInfo(new AcademicInfo());
         student.setRegistrationDate(LocalDateTime.now());
         studentRepository.save(student);
@@ -131,7 +133,9 @@ public class AuthService {
         alumni.setUser(user);
         alumni.setRegistrationNumber(req.registrationNumber().toUpperCase());
         alumni.setAcademicInfo(academicInfo);
-        alumni.setPersonalInfo(new PersonalInfo());
+        PersonalInfo personalInfo = new PersonalInfo();
+        personalInfo.setEmail(req.email());
+        alumni.setPersonalInfo(personalInfo);
         alumniRepository.save(alumni);
 
         notificationService.notifyAllAdmins(
