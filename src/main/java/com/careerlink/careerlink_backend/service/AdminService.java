@@ -150,7 +150,7 @@ public class AdminService {
 
     @Transactional
     public ApplicationResponse adminUpdateApplicationStatus(Authentication auth, Long applicationId, ApplicationStatusUpdateRequest req) {
-        return applicationService.updateStatusAsAdmin(applicationId, req);
+        return applicationService.updateStatusAsAdmin(auth, applicationId, req);
     }
 
     @Transactional
@@ -394,13 +394,14 @@ public class AdminService {
     // ---------- Student account management ----------
 
     @Transactional
-    public void extendStudentAccount(Long studentId) {
+    public void extendStudentAccount(Long studentId, int days) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
+        LocalDateTime base = LocalDateTime.now();
         student.setAccountStatus(AccountStatus.ACTIVE);
-        student.setExpiryDate(LocalDateTime.now().plusDays(365));
-        student.setDeletionScheduledAt(LocalDateTime.now().plusDays(455));
+        student.setExpiryDate(base.plusDays(days));
+        student.setDeletionScheduledAt(base.plusDays(days).plusDays(90));
         studentRepository.save(student);
         notificationService.notifyUser(
                 student.getUser(), NotificationType.EXTENSION_APPROVED,

@@ -195,8 +195,9 @@ public class AdminController {
     }
 
     @PostMapping("/students/{id}/extend")
-    public ResponseEntity<ApiResponse<Void>> extendStudent(@PathVariable Long id) {
-        adminService.extendStudentAccount(id);
+    public ResponseEntity<ApiResponse<Void>> extendStudent(@PathVariable Long id, @RequestBody(required = false) ExtendStudentRequest req) {
+        int days = (req != null && req.days() != null) ? req.days() : 365;
+        adminService.extendStudentAccount(id, days);
         return ResponseEntity.ok(ApiResponse.success("Student account extended", null));
     }
 

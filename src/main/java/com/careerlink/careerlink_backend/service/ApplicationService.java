@@ -5,10 +5,7 @@ import com.careerlink.careerlink_backend.dto.request.ApplicationStatusUpdateRequ
 import com.careerlink.careerlink_backend.dto.request.AutoShortlistRequest;
 import com.careerlink.careerlink_backend.dto.request.BulkStatusUpdateRequest;
 import com.careerlink.careerlink_backend.dto.response.ApplicationResponse;
-import com.careerlink.careerlink_backend.entity.Application;
-import com.careerlink.careerlink_backend.entity.Job;
-import com.careerlink.careerlink_backend.entity.Student;
-import com.careerlink.careerlink_backend.entity.StudentPlacement;
+import com.careerlink.careerlink_backend.entity.*;
 import com.careerlink.careerlink_backend.entity.enums.ApplicationStatus;
 import com.careerlink.careerlink_backend.entity.enums.NotificationPriority;
 import com.careerlink.careerlink_backend.entity.enums.NotificationType;
@@ -20,6 +17,7 @@ import com.careerlink.careerlink_backend.mapper.ApplicationMapper;
 import com.careerlink.careerlink_backend.repository.ApplicationRepository;
 import com.careerlink.careerlink_backend.repository.StudentPlacementRepository;
 import com.careerlink.careerlink_backend.repository.StudentRepository;
+import com.careerlink.careerlink_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -43,6 +41,7 @@ public class ApplicationService {
     private final NotificationService notificationService;
     private final StudentPlacementRepository studentPlacementRepository;
     private final StudentRepository studentRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public ApplicationResponse applyForJob(Authentication auth, Long jobId, ApplicationRequest req) {
@@ -120,6 +119,7 @@ public class ApplicationService {
 
         ApplicationStatus newStatus = ApplicationStatus.valueOf(req.status());
         applyStatusTransition(application, newStatus, req.rejectionReason(), req.recruiterNotes());
+        application.setShortlistedBy(recruiter.getUser());
 
         Application saved = applicationRepository.save(application);
         notifyStudentOfStatusChange(saved);
@@ -176,10 +176,14 @@ public class ApplicationService {
     }
 
     @Transactional
-    public ApplicationResponse updateStatusAsAdmin(Long applicationId, ApplicationStatusUpdateRequest req) {
+    public ApplicationResponse updateStatusAsAdmin(Authentication auth, Long applicationId, ApplicationStatusUpdateRequest req) {
+
+        User admin = userRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         Application application = getApplicationEntity(applicationId);
         ApplicationStatus newStatus = ApplicationStatus.valueOf(req.status());
         applyStatusTransition(application, newStatus, req.rejectionReason(), req.recruiterNotes());
+        application.setShortlistedBy(admin);
 
         Application saved = applicationRepository.save(application);
         notifyStudentOfStatusChange(saved);
