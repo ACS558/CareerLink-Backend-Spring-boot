@@ -26,8 +26,8 @@ public class Post extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ContentType contentType = ContentType.TEXT;
 
-    @Lob
-    @Column(length = 5000)
+
+    @Column(length = 5000, columnDefinition = "TEXT")
     private String textContent;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
