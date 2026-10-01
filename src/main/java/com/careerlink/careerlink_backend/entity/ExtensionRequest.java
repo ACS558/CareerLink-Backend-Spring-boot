@@ -16,7 +16,7 @@ public class ExtensionRequest extends BaseEntity {
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String reason;
 
     @Enumerated(EnumType.STRING)
