@@ -4,8 +4,7 @@ import com.careerlink.careerlink_backend.dto.request.JobCreateRequest;
 import com.careerlink.careerlink_backend.dto.request.JobUpdateRequest;
 import com.careerlink.careerlink_backend.dto.response.ApiResponse;
 import com.careerlink.careerlink_backend.dto.response.JobResponse;
-import com.careerlink.careerlink_backend.mapper.JobMapper;
-import com.careerlink.careerlink_backend.repository.JobRepository;
+import com.careerlink.careerlink_backend.service.AdminService;
 import com.careerlink.careerlink_backend.service.JobService;
 import com.careerlink.careerlink_backend.service.StudentService;
 import jakarta.validation.Valid;
@@ -18,7 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -27,8 +25,7 @@ public class JobController {
 
     private final JobService jobService;
     private final StudentService studentService;
-    private final JobRepository jobRepository;
-    private final JobMapper jobMapper;
+    private final AdminService adminService;
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<JobResponse>> getJobById(@PathVariable Long id) {
@@ -72,20 +69,17 @@ public class JobController {
     @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN', 'SUPERADMIN')")
     public ResponseEntity<ApiResponse<List<JobResponse>>> getMyPostings(Authentication auth) {
 
-        boolean isAdmin = auth.getAuthorities().stream()
-                .anyMatch(role -> Objects.equals(role.getAuthority(), "ROLE_ADMIN")
-                        || Objects.equals(role.getAuthority(), "ROLE_SUPERADMIN"));
 
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN")
+                        || role.getAuthority().equals("ROLE_SUPERADMIN"));
 
         List<JobResponse> jobs;
-
         if (isAdmin) {
-            // Fetch ALL jobs using the repository directly and map them to JobResponse
-            jobs = jobRepository.findAll().stream()
-                    .map(jobMapper::toResponse)
-                    .toList();
+            // Safe service layer call for admins
+            jobs = adminService.listAllJobs(null, null);
         } else {
-            // Fall back to your original recruiter logic
+            // This is your original code that worked perfectly for recruiters
             jobs = jobService.getJobsByRecruiter(auth);
         }
 
