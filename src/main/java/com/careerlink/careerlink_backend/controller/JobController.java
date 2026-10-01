@@ -71,8 +71,8 @@ public class JobController {
 
 
         boolean isAdmin = auth.getAuthorities().stream()
-                .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN")
-                        || role.getAuthority().equals("ROLE_SUPERADMIN"));
+                .anyMatch(role -> "ROLE_ADMIN".equals(role.getAuthority())
+                        || "ROLE_SUPERADMIN".equals(role.getAuthority()));
 
         List<JobResponse> jobs;
         if (isAdmin) {
