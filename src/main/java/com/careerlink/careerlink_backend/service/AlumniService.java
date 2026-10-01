@@ -103,7 +103,8 @@ public class AlumniService {
                 a.getPersonalInfo() != null ? a.getPersonalInfo().getProfilePictureUrl() : null,
                 a.getSocialLinks() != null ? a.getSocialLinks().getTwitter() : null,
                 a.getCurrentRole() != null ? a.getCurrentRole().getStartDate() : null,
-                a.getExternalLinks().stream().map(l -> new ExternalLinkDto(l.getName(), l.getUrl())).toList()
+                a.getExternalLinks().stream().map(l -> new ExternalLinkDto(l.getName(), l.getUrl())).toList(),
+                a.getCreatedAt()
         );
     }
 

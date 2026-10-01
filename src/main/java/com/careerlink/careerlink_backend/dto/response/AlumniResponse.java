@@ -3,6 +3,7 @@ package com.careerlink.careerlink_backend.dto.response;
 import com.careerlink.careerlink_backend.dto.request.ExternalLinkDto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record AlumniResponse(
@@ -23,5 +24,6 @@ public record AlumniResponse(
         String portfolio,
         String verificationStatus,
         String photoUrl,
-        String twitter, LocalDate startDate, List<ExternalLinkDto> externalLinks
+        String twitter, LocalDate startDate, List<ExternalLinkDto> externalLinks,
+        LocalDateTime createdAt
 ) {}

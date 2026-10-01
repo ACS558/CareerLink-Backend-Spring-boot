@@ -75,7 +75,8 @@ public class RecruiterService {
                 r.getContactPerson() != null ? r.getContactPerson().getDesignation() : null,
                 r.getContactPerson() != null ? r.getContactPerson().getPhoneNumber() : null,
                 r.getContactPerson() != null ? r.getContactPerson().getEmail() : null,
-                r.getVerificationStatus().name()
+                r.getVerificationStatus().name(),
+                r.getCreatedAt()
         );
     }
 

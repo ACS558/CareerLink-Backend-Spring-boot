@@ -1,5 +1,7 @@
 package com.careerlink.careerlink_backend.dto.response;
 
+import java.time.LocalDateTime;
+
 public record RecruiterResponse(
         Long id,
         String email,
@@ -14,5 +16,6 @@ public record RecruiterResponse(
         String contactDesignation,
         String contactPhone,
         String contactEmail,
-        String verificationStatus
+        String verificationStatus,
+        LocalDateTime createdAt
 ) {}

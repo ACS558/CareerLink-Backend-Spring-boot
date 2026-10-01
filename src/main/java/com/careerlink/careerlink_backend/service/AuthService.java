@@ -6,10 +6,7 @@ import com.careerlink.careerlink_backend.dto.request.RecruiterRegisterRequest;
 import com.careerlink.careerlink_backend.dto.request.StudentRegisterRequest;
 import com.careerlink.careerlink_backend.dto.response.AuthResponse;
 import com.careerlink.careerlink_backend.entity.*;
-import com.careerlink.careerlink_backend.entity.embeddable.AcademicInfo;
-import com.careerlink.careerlink_backend.entity.embeddable.CompanyInfo;
-import com.careerlink.careerlink_backend.entity.embeddable.ContactPerson;
-import com.careerlink.careerlink_backend.entity.embeddable.PersonalInfo;
+import com.careerlink.careerlink_backend.entity.embeddable.*;
 import com.careerlink.careerlink_backend.entity.enums.NotificationType;
 import com.careerlink.careerlink_backend.entity.enums.Role;
 import com.careerlink.careerlink_backend.exception.DuplicateResourceException;
@@ -86,6 +83,9 @@ public class AuthService {
         companyInfo.setCompanyName(req.companyName());
         companyInfo.setIndustry(req.industry());
         companyInfo.setLocation(req.location());
+        companyInfo.setWebsite(req.website());
+        companyInfo.setCompanySize(req.companySize());
+        companyInfo.setDescription(req.description());
 
         ContactPerson contactPerson = new ContactPerson();
         contactPerson.setName(req.contactName());
@@ -129,13 +129,22 @@ public class AuthService {
         academicInfo.setBranch(req.branch());
         academicInfo.setGraduationYear(req.graduationYear());
 
+        CurrentRole currentRole = new CurrentRole();
+        currentRole.setCompany(req.currentCompany());
+        currentRole.setDesignation(req.currentRole());
+        currentRole.setExperience(req.experience() != null ? req.experience() : 0);
+
         Alumni alumni = new Alumni();
         alumni.setUser(user);
         alumni.setRegistrationNumber(req.registrationNumber().toUpperCase());
         alumni.setAcademicInfo(academicInfo);
         PersonalInfo personalInfo = new PersonalInfo();
         personalInfo.setEmail(req.email());
+        String[] nameParts = req.name().trim().split("\\s+", 2);
+        personalInfo.setFirstName(nameParts[0]);
+        personalInfo.setLastName(nameParts.length > 1 ? nameParts[1] : "");
         alumni.setPersonalInfo(personalInfo);
+        alumni.setCurrentRole(currentRole);
         alumniRepository.save(alumni);
 
         notificationService.notifyAllAdmins(
