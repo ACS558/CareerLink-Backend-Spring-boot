@@ -4,7 +4,6 @@ import com.careerlink.careerlink_backend.dto.request.JobCreateRequest;
 import com.careerlink.careerlink_backend.dto.request.JobUpdateRequest;
 import com.careerlink.careerlink_backend.dto.response.ApiResponse;
 import com.careerlink.careerlink_backend.dto.response.JobResponse;
-import com.careerlink.careerlink_backend.service.AdminService;
 import com.careerlink.careerlink_backend.service.JobService;
 import com.careerlink.careerlink_backend.service.StudentService;
 import jakarta.validation.Valid;
@@ -25,7 +24,6 @@ public class JobController {
 
     private final JobService jobService;
     private final StudentService studentService;
-    private final AdminService adminService;
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<JobResponse>> getJobById(@PathVariable Long id) {
@@ -66,23 +64,8 @@ public class JobController {
     }
 
     @GetMapping("/my-postings")
-    @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN', 'SUPERADMIN')")
+    @PreAuthorize("hasRole('RECRUITER')")
     public ResponseEntity<ApiResponse<List<JobResponse>>> getMyPostings(Authentication auth) {
-
-
-        boolean isAdmin = auth.getAuthorities().stream()
-                .anyMatch(role -> "ROLE_ADMIN".equals(role.getAuthority())
-                        || "ROLE_SUPERADMIN".equals(role.getAuthority()));
-
-        List<JobResponse> jobs;
-        if (isAdmin) {
-            // Safe service layer call for admins
-            jobs = adminService.listAllJobs(null, null);
-        } else {
-            // This is your original code that worked perfectly for recruiters
-            jobs = jobService.getJobsByRecruiter(auth);
-        }
-
-        return ResponseEntity.ok(ApiResponse.success(jobs));
+        return ResponseEntity.ok(ApiResponse.success(jobService.getJobsByRecruiter(auth)));
     }
 }
