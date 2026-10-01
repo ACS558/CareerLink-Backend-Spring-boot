@@ -105,7 +105,8 @@ public class PostService {
 
     public Page<PostResponse> getFeed(Authentication auth, Pageable pageable) {
         User user = currentUser(auth);
-        return postRepository.findByIsDeletedFalseOrderByIsPinnedDescCreatedAtDesc(pageable)
+
+        return postRepository.findVisibleFeed(user.getRole().name(), user.getId(), pageable)
                 .map(post -> postMapper.toResponse(post, hasUserViewed(post.getId(), user.getId())));
     }
 
