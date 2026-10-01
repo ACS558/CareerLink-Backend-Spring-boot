@@ -12,15 +12,14 @@ import org.springframework.stereotype.Repository;
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("""
-        SELECT p FROM Post p
-        WHERE p.isDeleted = false
-        AND (
-            :viewerRole IN ('STUDENT', 'ADMIN')
-            OR p.authorRole = 'ADMIN'
-            OR p.authorId = :viewerUserId
-        )
-        ORDER BY p.isPinned DESC, p.createdAt DESC
-        """)
+    SELECT p FROM Post p
+    WHERE p.isDeleted = false
+    AND (
+        :viewerRole IN ('STUDENT', 'ADMIN')
+        OR p.authorId = :viewerUserId
+    )
+    ORDER BY p.isPinned DESC, p.createdAt DESC
+    """)
     Page<Post> findVisibleFeed(
             @Param("viewerRole") String viewerRole,
             @Param("viewerUserId") Long viewerUserId,
