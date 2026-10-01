@@ -4,6 +4,8 @@ import com.careerlink.careerlink_backend.dto.request.JobCreateRequest;
 import com.careerlink.careerlink_backend.dto.request.JobUpdateRequest;
 import com.careerlink.careerlink_backend.dto.response.ApiResponse;
 import com.careerlink.careerlink_backend.dto.response.JobResponse;
+import com.careerlink.careerlink_backend.mapper.JobMapper;
+import com.careerlink.careerlink_backend.repository.JobRepository;
 import com.careerlink.careerlink_backend.service.JobService;
 import com.careerlink.careerlink_backend.service.StudentService;
 import jakarta.validation.Valid;
@@ -16,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -24,6 +27,8 @@ public class JobController {
 
     private final JobService jobService;
     private final StudentService studentService;
+    private final JobRepository jobRepository;
+    private final JobMapper jobMapper;
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<JobResponse>> getJobById(@PathVariable Long id) {
@@ -64,8 +69,26 @@ public class JobController {
     }
 
     @GetMapping("/my-postings")
-    @PreAuthorize("hasRole('RECRUITER')")
+    @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN', 'SUPERADMIN')")
     public ResponseEntity<ApiResponse<List<JobResponse>>> getMyPostings(Authentication auth) {
-        return ResponseEntity.ok(ApiResponse.success(jobService.getJobsByRecruiter(auth)));
+
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(role -> Objects.equals(role.getAuthority(), "ROLE_ADMIN")
+                        || Objects.equals(role.getAuthority(), "ROLE_SUPERADMIN"));
+
+
+        List<JobResponse> jobs;
+
+        if (isAdmin) {
+            // Fetch ALL jobs using the repository directly and map them to JobResponse
+            jobs = jobRepository.findAll().stream()
+                    .map(jobMapper::toResponse)
+                    .toList();
+        } else {
+            // Fall back to your original recruiter logic
+            jobs = jobService.getJobsByRecruiter(auth);
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(jobs));
     }
 }
