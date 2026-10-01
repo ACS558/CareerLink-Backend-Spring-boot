@@ -27,7 +27,7 @@ public class Notification extends BaseEntity {
 
     private String title;
 
-    @Lob
+    @Column(columnDefinition = "TEXT", length =2000)
     private String message;
 
     private Long relatedJobId;
