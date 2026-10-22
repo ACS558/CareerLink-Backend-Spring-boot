@@ -15,6 +15,7 @@ import java.util.List;
 @Embeddable
 public class AtsScore {
 
+
     private Double score;
 
     @JdbcTypeCode(SqlTypes.ARRAY)
