@@ -6,7 +6,6 @@ import com.careerlink.careerlink_backend.dto.response.ExtensionStatsResponse;
 import com.careerlink.careerlink_backend.entity.Admin;
 import com.careerlink.careerlink_backend.entity.ExtensionRequest;
 import com.careerlink.careerlink_backend.entity.Student;
-import com.careerlink.careerlink_backend.entity.enums.AccountStatus;
 import com.careerlink.careerlink_backend.entity.enums.ExtensionStatus;
 import com.careerlink.careerlink_backend.entity.enums.NotificationPriority;
 import com.careerlink.careerlink_backend.entity.enums.NotificationType;
@@ -79,14 +78,7 @@ public class ExtensionRequestService {
 
         if (approve) {
             int days = req.extensionDays() != null ? req.extensionDays() : 30;
-            LocalDateTime currentExpiry = student.getExpiryDate() != null ? student.getExpiryDate() : LocalDateTime.now();
-            LocalDateTime newExpiry = currentExpiry.plusDays(days);
-            student.setExpiryDate(newExpiry);
-            student.setDeletionScheduledAt(newExpiry.plusDays(90));
-
-            if (student.getAccountStatus() == AccountStatus.EXPIRED) {
-                student.setAccountStatus(AccountStatus.ACTIVE);
-            }
+            student.extendExpiry(days);
         }
 
         notificationService.notifyUser(

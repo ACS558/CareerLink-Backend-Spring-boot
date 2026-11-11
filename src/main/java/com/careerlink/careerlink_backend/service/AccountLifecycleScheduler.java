@@ -22,16 +22,11 @@ public class AccountLifecycleScheduler {
     private final StudentRepository studentRepository;
     private final NotificationService notificationService;
 
-    // Runs daily at 2 AM server time
+    // Daily at 2 AM: mark accounts past their expiry date as EXPIRED. Nothing is ever deleted.
     @Scheduled(cron = "0 0 2 * * *")
     @Transactional
-    public void runLifecycleSweep() {
+    public void expireOverdueAccounts() {
         LocalDateTime now = LocalDateTime.now();
-        expireOverdueAccounts(now);
-        softDeleteOverdueAccounts(now);
-    }
-
-    private void expireOverdueAccounts(LocalDateTime now) {
         List<Student> active = studentRepository.findByAccountStatus(AccountStatus.ACTIVE);
         int expired = 0;
 
@@ -44,33 +39,13 @@ public class AccountLifecycleScheduler {
                 notificationService.notifyUser(
                         student.getUser(), NotificationType.ACCOUNT_EXPIRED,
                         "Account Expired",
-                        "Your CareerLink account has expired. Request an extension from your dashboard if you need more time.",
+                        "Your CareerLink account has expired. You can request an extension from your dashboard.",
                         null, null, NotificationPriority.HIGH, "/student/dashboard"
                 );
             }
         }
         if (expired > 0) {
             log.info("Account lifecycle sweep: expired {} student account(s)", expired);
-        }
-    }
-
-    private void softDeleteOverdueAccounts(LocalDateTime now) {
-        List<Student> expired = studentRepository.findByAccountStatus(AccountStatus.EXPIRED);
-        int deleted = 0;
-
-        for (Student student : expired) {
-            if (student.getDeletionScheduledAt() != null
-                    && student.getDeletionScheduledAt().isBefore(now)
-                    && !student.isDeleted()) {
-                student.setDeleted(true);
-                student.setDeletedAt(now);
-                student.setAccountStatus(AccountStatus.DELETED);
-                studentRepository.save(student);
-                deleted++;
-            }
-        }
-        if (deleted > 0) {
-            log.info("Account lifecycle sweep: soft-deleted {} student account(s)", deleted);
         }
     }
 }

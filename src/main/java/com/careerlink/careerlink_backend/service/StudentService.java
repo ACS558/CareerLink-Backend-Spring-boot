@@ -323,11 +323,9 @@ public class StudentService {
         LocalDateTime now = LocalDateTime.now();
 
         LocalDateTime expiry = student.getExpiryDate();
-        long daysUntilExpiry = expiry != null ? Math.max(0, ChronoUnit.DAYS.between(now, expiry)) : 0;
+        boolean expired = expiry != null && !now.isBefore(expiry);
+        long daysUntilExpiry = (expiry != null && !expired) ? ChronoUnit.DAYS.between(now, expiry) : 0;
 
-        LocalDateTime guidanceStart = student.getCareerGuidanceStartDate();
-        boolean inGuidanceMode = guidanceStart != null && expiry != null
-                && !now.isBefore(guidanceStart) && now.isBefore(expiry);
 
         List<StudentPlacementResponse> placements = studentPlacementRepository.findByStudentId(student.getId())
                 .stream()
@@ -349,7 +347,7 @@ public class StudentService {
         );
 
         return new StudentDashboardResponse(
-                inGuidanceMode ? "career_guidance" : "normal",
+                expired ? "career_guidance" : "normal",
                 daysUntilExpiry, student.getAccountStatus().name(),
                 student.getPlacementStatus().name(), info
         );

@@ -398,15 +398,13 @@ public class AdminService {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
-        LocalDateTime base = LocalDateTime.now();
-        student.setAccountStatus(AccountStatus.ACTIVE);
-        student.setExpiryDate(base.plusDays(days));
-        student.setDeletionScheduledAt(base.plusDays(days).plusDays(90));
+        student.extendExpiry(days);
         studentRepository.save(student);
+
         notificationService.notifyUser(
                 student.getUser(), NotificationType.EXTENSION_APPROVED,
                 "Account Extended",
-                "Your CareerLink account access has been extended by one year.",
+                "Your CareerLink account access has been extended by an administrator.",
                 null, null, NotificationPriority.MEDIUM, "/student/dashboard"
         );
     }

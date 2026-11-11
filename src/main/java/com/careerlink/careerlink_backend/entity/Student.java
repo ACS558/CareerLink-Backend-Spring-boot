@@ -6,9 +6,7 @@ import com.careerlink.careerlink_backend.entity.enums.PlacementStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.JdbcTypeCode;
 
-import java.sql.Types;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,21 +83,26 @@ public class Student extends BaseEntity {
 
     private LocalDateTime careerGuidanceStartDate;
     private LocalDateTime expiryDate;
-    private LocalDateTime deletionScheduledAt;
+
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ExtensionRequest> extensionRequests = new ArrayList<>();
 
-    private boolean isDeleted = false;
-    private LocalDateTime deletedAt;
 
     @PrePersist
     public void computeLifecycleDates() {
         if (registrationDate == null) {
             registrationDate = LocalDateTime.now();
         }
-        careerGuidanceStartDate = registrationDate.plusDays(365);
         expiryDate = registrationDate.plusDays(375);
-        deletionScheduledAt = registrationDate.plusDays(465);
+    }
+
+    public void extendExpiry(int days) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime base = (expiryDate != null && expiryDate.isAfter(now)) ? expiryDate : now;
+        this.expiryDate = base.plusDays(days);
+        if (this.accountStatus == AccountStatus.EXPIRED) {
+            this.accountStatus = AccountStatus.ACTIVE;
+        }
     }
 }
