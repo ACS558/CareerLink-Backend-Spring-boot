@@ -39,22 +39,63 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     @Query("SELECT MAX(s.placedPackage) FROM Student s WHERE s.placementStatus = 'PLACED'")
     Double highestPlacedPackage();
 
+//    @Query("""
+//    SELECT s FROM Student s
+//    WHERE (:branch IS NULL OR s.academicInfo.branch = :branch)
+//    AND (:placementStatus IS NULL OR CAST(s.placementStatus AS string) = :placementStatus)
+//    AND (:graduationYear IS NULL OR s.academicInfo.graduationYear = :graduationYear)
+//    AND (LOWER(COALESCE(s.registrationNumber, '')) LIKE :pattern ESCAPE '\\'
+//      OR LOWER(COALESCE(s.personalInfo.firstName, '')) LIKE :pattern ESCAPE '\\'
+//      OR LOWER(COALESCE(s.personalInfo.lastName, '')) LIKE :pattern ESCAPE '\\')
+//    ORDER BY s.academicInfo.cgpa DESC
+//    """)
+//    Page<Student> searchStudents(
+//            @Param("pattern") String pattern,
+//            @Param("branch") String branch,
+//            @Param("placementStatus") String placementStatus,
+//            @Param("graduationYear") Integer graduationYear,
+//            Pageable pageable);
+
     @Query("""
-    SELECT s FROM Student s
-    WHERE (:branch IS NULL OR s.academicInfo.branch = :branch)
-    AND (:placementStatus IS NULL OR CAST(s.placementStatus AS string) = :placementStatus)
-    AND (:graduationYear IS NULL OR s.academicInfo.graduationYear = :graduationYear)
-    AND (LOWER(COALESCE(s.registrationNumber, '')) LIKE :pattern ESCAPE '\\'
-      OR LOWER(COALESCE(s.personalInfo.firstName, '')) LIKE :pattern ESCAPE '\\'
-      OR LOWER(COALESCE(s.personalInfo.lastName, '')) LIKE :pattern ESCAPE '\\')
-    ORDER BY s.academicInfo.cgpa DESC
-    """)
+        SELECT s FROM Student s
+        WHERE (CAST(:academicYear AS integer) IS NULL OR s.academicYear = CAST(:academicYear AS integer))
+        AND (CAST(:branch AS string) IS NULL OR s.academicInfo.branch = CAST(:branch AS string))
+        AND (CAST(:placementStatus AS string) IS NULL
+             OR CAST(s.placementStatus AS string) = CAST(:placementStatus AS string))
+        AND (CAST(:graduationYear AS integer) IS NULL
+             OR s.academicInfo.graduationYear = CAST(:graduationYear AS integer))
+        AND (CAST(:search AS string) IS NULL
+             OR LOWER(s.registrationNumber) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%'))
+             OR LOWER(s.personalInfo.firstName) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%'))
+             OR LOWER(s.personalInfo.lastName) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))
+        ORDER BY s.academicInfo.cgpa DESC NULLS LAST, s.registrationNumber ASC
+        """)
     Page<Student> searchStudents(
-            @Param("pattern") String pattern,
+            @Param("search") String search,
             @Param("branch") String branch,
             @Param("placementStatus") String placementStatus,
             @Param("graduationYear") Integer graduationYear,
+            @Param("academicYear") Integer academicYear,
             Pageable pageable);
+
+    @Query("""
+        SELECT s.academicYear, COUNT(s)
+        FROM Student s
+        WHERE s.academicYear IS NOT NULL
+        AND (CAST(:branch AS string) IS NULL OR s.academicInfo.branch = CAST(:branch AS string))
+        AND (CAST(:placementStatus AS string) IS NULL
+             OR CAST(s.placementStatus AS string) = CAST(:placementStatus AS string))
+        AND (CAST(:search AS string) IS NULL
+             OR LOWER(s.registrationNumber) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%'))
+             OR LOWER(s.personalInfo.firstName) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%'))
+             OR LOWER(s.personalInfo.lastName) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))
+        GROUP BY s.academicYear
+        ORDER BY s.academicYear DESC
+        """)
+    List<Object[]> countByAcademicYear(
+            @Param("search") String search,
+            @Param("branch") String branch,
+            @Param("placementStatus") String placementStatus);
 
     @Query("SELECT MIN(s.placedPackage) FROM Student s WHERE s.placementStatus = 'PLACED'")
     Double lowestPlacedPackage();

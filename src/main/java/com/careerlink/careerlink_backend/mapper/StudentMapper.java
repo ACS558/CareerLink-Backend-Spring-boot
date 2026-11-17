@@ -41,7 +41,8 @@ public class StudentMapper {
                 toProjectDtos(s.getProjects()),
                 toInternshipDtos(s.getInternships()),
                 toCertificationDtos(s.getCertifications()),
-                toExternalLinkDtos(s.getExternalLinks())
+                toExternalLinkDtos(s.getExternalLinks()),
+                        s.getExpiryDate()
         );
     }
 

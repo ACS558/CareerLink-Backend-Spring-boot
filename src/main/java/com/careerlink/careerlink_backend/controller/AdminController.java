@@ -74,16 +74,37 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success(adminService.listAllAlumni(search, verificationStatus, branch, graduationYear)));
     }
 
+//    @GetMapping("/students")
+//    public ResponseEntity<ApiResponse<Page<StudentResponse>>> allStudents(
+//            @RequestParam(required = false) String search,
+//            @RequestParam(required = false) String branch,
+//            @RequestParam(required = false) String placementStatus,
+//            @RequestParam(required = false) Integer graduationYear,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "20") int size) {
+//        return ResponseEntity.ok(ApiResponse.success(
+//                adminService.listAllStudents(search, branch, placementStatus, graduationYear, PageRequest.of(page, size))));
+//    }
+
     @GetMapping("/students")
     public ResponseEntity<ApiResponse<Page<StudentResponse>>> allStudents(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String branch,
             @RequestParam(required = false) String placementStatus,
             @RequestParam(required = false) Integer graduationYear,
+            @RequestParam(required = false) Integer academicYear,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(ApiResponse.success(
-                adminService.listAllStudents(search, branch, placementStatus, graduationYear, PageRequest.of(page, size))));
+        return ResponseEntity.ok(ApiResponse.success(adminService.listAllStudents(
+                search, branch, placementStatus, graduationYear, academicYear, PageRequest.of(page, size))));
+    }
+
+    @GetMapping("/students/academic-years")
+    public ResponseEntity<ApiResponse<List<AcademicYearSummary>>> studentAcademicYears(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String branch,
+            @RequestParam(required = false) String placementStatus) {
+        return ResponseEntity.ok(ApiResponse.success(adminService.listAcademicYears(search, branch, placementStatus)));
     }
 
     @GetMapping("/jobs")

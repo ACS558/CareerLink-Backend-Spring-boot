@@ -24,6 +24,10 @@ public class Student extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String registrationNumber;
 
+    private static final int ACADEMIC_YEAR_START_MONTH = 6;
+
+    private Integer academicYear;
+
     @Embedded
     private PersonalInfo personalInfo;
 
@@ -94,6 +98,10 @@ public class Student extends BaseEntity {
         if (registrationDate == null) {
             registrationDate = LocalDateTime.now();
         }
+        academicYear = registrationDate.getMonthValue() >= ACADEMIC_YEAR_START_MONTH
+                ? registrationDate.getYear()
+                : registrationDate.getYear() - 1;
+        careerGuidanceStartDate = registrationDate.plusDays(365);
         expiryDate = registrationDate.plusDays(375);
     }
 

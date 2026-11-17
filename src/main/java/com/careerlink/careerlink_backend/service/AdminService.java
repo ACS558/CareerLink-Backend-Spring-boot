@@ -106,12 +106,36 @@ public class AdminService {
                 .stream().map(alumniService::toResponse).toList();
     }
 
+//    public Page<StudentResponse> listAllStudents(String search, String branch, String placementStatus,
+//                                                 Integer graduationYear, Pageable pageable) {
+//        String b  = (branch != null && !branch.isBlank()) ? branch : null;
+//        String ps = (placementStatus != null && !placementStatus.isBlank()) ? placementStatus.toUpperCase() : null;
+//        return studentRepository.searchStudents(toPattern(search), b, ps, graduationYear, pageable)
+//                .map(studentMapper::toResponse);
+//    }
+
     public Page<StudentResponse> listAllStudents(String search, String branch, String placementStatus,
-                                                 Integer graduationYear, Pageable pageable) {
-        String b  = (branch != null && !branch.isBlank()) ? branch : null;
-        String ps = (placementStatus != null && !placementStatus.isBlank()) ? placementStatus.toUpperCase() : null;
-        return studentRepository.searchStudents(toPattern(search), b, ps, graduationYear, pageable)
+                                                 Integer graduationYear, Integer academicYear, Pageable pageable) {
+        return studentRepository
+                .searchStudents(blankToNull(search), blankToNull(branch), upperOrNull(placementStatus),
+                        graduationYear, academicYear, pageable)
                 .map(studentMapper::toResponse);
+    }
+
+    public List<AcademicYearSummary> listAcademicYears(String search, String branch, String placementStatus) {
+        return studentRepository
+                .countByAcademicYear(blankToNull(search), blankToNull(branch), upperOrNull(placementStatus))
+                .stream()
+                .map(row -> AcademicYearSummary.of((Integer) row[0], (Long) row[1]))
+                .toList();
+    }
+
+    private String blankToNull(String v) {
+        return (v != null && !v.isBlank()) ? v : null;
+    }
+
+    private String upperOrNull(String v) {
+        return (v != null && !v.isBlank()) ? v.toUpperCase() : null;
     }
 
     public List<JobResponse> listAllJobs(String search, String status) {

@@ -38,5 +38,6 @@ public record StudentResponse(
         List<ProjectDto> projects,
         List<InternshipDto> internships,
         List<CertificationDto> certifications,
-        List<ExternalLinkDto> externalLinks
+        List<ExternalLinkDto> externalLinks,
+        LocalDateTime expiryDate
 ) {}
