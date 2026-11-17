@@ -117,26 +117,38 @@ public class AdminService {
     public Page<StudentResponse> listAllStudents(String search, String branch, String placementStatus,
                                                  Integer graduationYear, Integer academicYear, Pageable pageable) {
         return studentRepository
-                .searchStudents(blankToNull(search), blankToNull(branch), upperOrNull(placementStatus),
+                .searchStudents(toSearchPattern(search), blankToNull(branch), upperOrNull(placementStatus),
                         graduationYear, academicYear, pageable)
                 .map(studentMapper::toResponse);
     }
 
     public List<AcademicYearSummary> listAcademicYears(String search, String branch, String placementStatus) {
         return studentRepository
-                .countByAcademicYear(blankToNull(search), blankToNull(branch), upperOrNull(placementStatus))
+                .countByAcademicYear(toSearchPattern(search), blankToNull(branch), upperOrNull(placementStatus))
                 .stream()
                 .map(row -> AcademicYearSummary.of((Integer) row[0], (Long) row[1]))
                 .toList();
     }
 
+    private String toSearchPattern(String v) {
+        if (v == null || v.isBlank()) {
+            return null;
+        }
+        String escaped = v.trim().toLowerCase()
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
+        return "%" + escaped + "%";
+    }
+
     private String blankToNull(String v) {
-        return (v != null && !v.isBlank()) ? v : null;
+        return (v != null && !v.isBlank()) ? v.trim() : null;
     }
 
     private String upperOrNull(String v) {
-        return (v != null && !v.isBlank()) ? v.toUpperCase() : null;
+        return (v != null && !v.isBlank()) ? v.trim().toUpperCase() : null;
     }
+
 
     public List<JobResponse> listAllJobs(String search, String status) {
         String st = (status != null && !status.isBlank()) ? status.toUpperCase() : null;
