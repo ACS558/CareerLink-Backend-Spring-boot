@@ -38,5 +38,9 @@ gemini:
   api-key: ${GEMINI_API_KEY}
   api-url: ${GEMINI_API_URL:https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent}
 
+mail:
+  api-key: ${MAIL_API_KEY:}
+  from-email: ${MAIL_FROM_EMAIL:}
+
 cors:
   allowed-origins: ${FRONTEND_URL:http://localhost:5173}

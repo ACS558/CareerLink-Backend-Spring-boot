@@ -1,12 +1,10 @@
 package com.careerlink.careerlink_backend.controller;
 
-import com.careerlink.careerlink_backend.dto.request.AlumniRegisterRequest;
-import com.careerlink.careerlink_backend.dto.request.LoginRequest;
-import com.careerlink.careerlink_backend.dto.request.RecruiterRegisterRequest;
-import com.careerlink.careerlink_backend.dto.request.StudentRegisterRequest;
+import com.careerlink.careerlink_backend.dto.request.*;
 import com.careerlink.careerlink_backend.dto.response.ApiResponse;
 import com.careerlink.careerlink_backend.dto.response.AuthResponse;
 import com.careerlink.careerlink_backend.service.AuthService;
+import com.careerlink.careerlink_backend.service.PasswordResetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final PasswordResetService passwordResetService;
 
     @PostMapping("/register/student")
     public ResponseEntity<ApiResponse<AuthResponse>> registerStudent(@Valid @RequestBody StudentRegisterRequest req) {
@@ -41,5 +40,17 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest req) {
         AuthResponse response = authService.login(req);
         return ResponseEntity.ok(ApiResponse.success("Login successful", response));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
+        passwordResetService.requestReset(req.identifier());
+        return ResponseEntity.ok(ApiResponse.success("If an account exists, a reset link has been sent to its email", null));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest req) {
+        passwordResetService.resetPassword(req.token(), req.newPassword());
+        return ResponseEntity.ok(ApiResponse.success("Password reset successful. Please log in.", null));
     }
 }

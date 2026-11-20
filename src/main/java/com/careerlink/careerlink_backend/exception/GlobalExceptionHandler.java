@@ -86,4 +86,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMaxUpload(MaxUploadSizeExceededException ex, WebRequest request) {
         return build(HttpStatus.PAYLOAD_TOO_LARGE, "File size exceeds the 5MB limit", request);
     }
+
+    @ExceptionHandler(InvalidResetTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidResetToken(InvalidResetTokenException ex, WebRequest request) {
+        return build(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+    }
 }
