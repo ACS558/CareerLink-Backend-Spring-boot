@@ -6,6 +6,8 @@ import com.careerlink.careerlink_backend.entity.enums.PlacementStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,9 +36,8 @@ public class Student extends BaseEntity {
     @Embedded
     private AcademicInfo academicInfo;
 
-    @ElementCollection
-    @CollectionTable(name = "student_skills", joinColumns = @JoinColumn(name = "student_id"))
-    @Column(name = "skill")
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "skills", columnDefinition = "text[] not null default '{}'")
     private List<String> skills = new ArrayList<>();
 
     @Embedded

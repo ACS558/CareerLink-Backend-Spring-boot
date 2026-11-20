@@ -3,6 +3,9 @@ package com.careerlink.careerlink_backend.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,9 +24,8 @@ public class Project extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @ElementCollection
-    @CollectionTable(name = "project_technologies", joinColumns = @JoinColumn(name = "project_id"))
-    @Column(name = "technology")
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "technologies", columnDefinition = "text[] not null default '{}'")
     private List<String> technologies = new ArrayList<>();
 
     private String liveLink;

@@ -4,6 +4,9 @@ import com.careerlink.careerlink_backend.entity.enums.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,9 +53,8 @@ public class Job extends BaseEntity {
     @Column(name = "year")
     private List<Integer> graduationYears = new ArrayList<>();
 
-    @ElementCollection
-    @CollectionTable(name = "job_skills_required", joinColumns = @JoinColumn(name = "job_id"))
-    @Column(name = "skill")
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "skills_required", columnDefinition = "text[] not null default '{}'")
     private List<String> skillsRequired = new ArrayList<>();
 
     private Integer numberOfOpenings = 1;
