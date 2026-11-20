@@ -35,7 +35,7 @@ public class PasswordResetService {
     private final EmailService emailService;
     private final SecureRandom random = new SecureRandom();
 
-    @Value("${app.frontend-url}")
+    @Value("${FRONTEND_URL:http://localhost:5173}")
     private String frontendUrl;
 
     @Transactional
