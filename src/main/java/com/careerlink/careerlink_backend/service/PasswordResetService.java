@@ -51,7 +51,7 @@ public class PasswordResetService {
             user.setResetPasswordExpire(LocalDateTime.now().plusMinutes(EXPIRY_MINUTES));
             userRepository.save(user);
 
-            String link = frontendUrl + "/reset-password?token=" + token;
+            String link = frontendUrl + "reset-password?token=" + token;
             emailService.sendPasswordResetLink(user.getEmail(), link, EXPIRY_MINUTES);
         });
     }
