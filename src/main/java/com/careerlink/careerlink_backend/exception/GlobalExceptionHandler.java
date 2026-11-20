@@ -91,4 +91,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleInvalidResetToken(InvalidResetTokenException ex, WebRequest request) {
         return build(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
     }
+
+    @ExceptionHandler(OtpException.class)
+    public ResponseEntity<ErrorResponse> handleOtp(OtpException ex, WebRequest request) {
+        return build(ex.getStatus(), ex.getMessage(), request);
+    }
 }

@@ -36,6 +36,18 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Alumni registered — pending admin approval", response));
     }
 
+    @PostMapping("/register/send-otp")
+    public ResponseEntity<ApiResponse<Void>> sendRegisterOtp(@Valid @RequestBody SendOtpRequest req) {
+        authService.sendRegistrationOtp(req.email());
+        return ResponseEntity.ok(ApiResponse.success("Verification code sent", null));
+    }
+
+    @PostMapping("/register/verify-otp")
+    public ResponseEntity<ApiResponse<Void>> verifyRegisterOtp(@Valid @RequestBody VerifyOtpRequest req) {
+        authService.verifyRegistrationOtp(req.email(), req.otp());
+        return ResponseEntity.ok(ApiResponse.success("Email verified", null));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest req) {
         AuthResponse response = authService.login(req);

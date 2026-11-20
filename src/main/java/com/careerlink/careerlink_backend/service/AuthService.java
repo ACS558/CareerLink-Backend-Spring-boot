@@ -8,6 +8,7 @@ import com.careerlink.careerlink_backend.dto.response.AuthResponse;
 import com.careerlink.careerlink_backend.entity.*;
 import com.careerlink.careerlink_backend.entity.embeddable.*;
 import com.careerlink.careerlink_backend.entity.enums.NotificationType;
+import com.careerlink.careerlink_backend.entity.enums.OtpPurpose;
 import com.careerlink.careerlink_backend.entity.enums.Role;
 import com.careerlink.careerlink_backend.exception.DuplicateResourceException;
 import com.careerlink.careerlink_backend.exception.InvalidCredentialsException;
@@ -35,6 +36,7 @@ public class AuthService {
     private final CustomUserDetailsService userDetailsService;
     private final NotificationService notificationService;
     private final AdminRepository adminRepository;
+    private final OtpService otpService;
 
 
     @Transactional
@@ -45,6 +47,8 @@ public class AuthService {
         if (studentRepository.existsByRegistrationNumber(req.registrationNumber().toUpperCase())) {
             throw new DuplicateResourceException("Registration number already registered");
         }
+
+        otpService.requireVerified(req.email(), OtpPurpose.REGISTER);
 
         User user = new User();
         user.setEmail(req.email());
@@ -62,6 +66,8 @@ public class AuthService {
         student.setAcademicInfo(new AcademicInfo());
         student.setRegistrationDate(LocalDateTime.now());
         studentRepository.save(student);
+
+        otpService.consume(req.email(), OtpPurpose.REGISTER);
 
         return buildAuthResponse(user, req.registrationNumber());
     }
@@ -118,6 +124,8 @@ public class AuthService {
             throw new DuplicateResourceException("Registration number already registered");
         }
 
+        otpService.requireVerified(req.email(), OtpPurpose.REGISTER);
+
         User user = new User();
         user.setEmail(req.email());
         user.setPassword(passwordEncoder.encode(req.password()));
@@ -154,6 +162,7 @@ public class AuthService {
                 "/admin/alumni"
         );
 
+        otpService.consume(req.email(), OtpPurpose.REGISTER);
 
         return buildAuthResponse(user, req.registrationNumber());
     }
@@ -211,5 +220,16 @@ public class AuthService {
 
 
         return new AuthResponse(token, user.getId(), user.getEmail(), user.getRole().name(), displayName, previousLastLogin, roleLevel);
+    }
+
+    public void sendRegistrationOtp(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new DuplicateResourceException("Email already registered");
+        }
+        otpService.sendOtp(email, OtpPurpose.REGISTER);
+    }
+
+    public void verifyRegistrationOtp(String email, String otp) {
+        otpService.verifyOtp(email, OtpPurpose.REGISTER, otp);
     }
 }
